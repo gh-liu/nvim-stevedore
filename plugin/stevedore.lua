@@ -18,7 +18,7 @@ vim.api.nvim_create_autocmd("BufReadCmd", {
 vim.api.nvim_create_autocmd("BufWriteCmd", {
 	pattern = { "stevedore://*" },
 	callback = function(args)
-		require("stevedore").BufWriteCmd()
+		require("stevedore").BufWriteCmd(vim.v.cmdbang == 1)
 	end,
 	nested = true,
 })

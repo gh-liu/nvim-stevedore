@@ -274,7 +274,8 @@ M.BufReadCmd = function()
 	end)
 end
 
-M.BufWriteCmd = function()
+---@param bang boolean
+M.BufWriteCmd = function(bang)
 	if vim.b.images then
 		local id2image = {}
 		for _, image in ipairs(vim.b.images) do
@@ -302,7 +303,7 @@ M.BufWriteCmd = function()
 			end
 		end
 		for _, id in ipairs(need_delete) do
-			Action.rmi(id, {})
+			Action.rmi(id, { force = bang })
 			print("delete " .. id)
 		end
 		for _, name in ipairs(need_create) do
