@@ -12,7 +12,7 @@ end
 
 Action.split_containers = function()
 	local id = Action.get_current_line_id()
-	split_bufname(vim.fn.bufname() .. id .. "/")
+	vim.cmd("pedit " .. vim.fn.bufname() .. id .. "/")
 end
 
 Action.attach_container = function(opts)
