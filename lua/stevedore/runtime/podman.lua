@@ -9,10 +9,9 @@ local Podman = {}
 Podman.list_images = function()
 	local images = {}
 	local obj = vim.system(
-		{ "podman", "images", "--format", "{{.ID}} {{.Repository}} {{.Tag}} {{.Size}}" },
+		{ "podman", "images", "--format", "{{.ID}} {{.Repository}} {{.Tag}} {{.Size}}", "--sort", "repository" },
 		{ text = true }
-	)
-		:wait()
+	):wait()
 	local image_lines = vim.split(obj.stdout, "\n", { trimempty = true })
 	for _, line in ipairs(image_lines) do
 		local parts = vim.split(line, " ", {})
