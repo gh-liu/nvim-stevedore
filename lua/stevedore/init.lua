@@ -1,5 +1,7 @@
 local autocmd = vim.api.nvim_create_autocmd
 
+local ui_update_lines = require("stevedore.ui").update_lines
+
 vim.api.nvim_set_hl(0, "StevedoreID", { link = "Label", default = true })
 
 ---@class image
@@ -39,38 +41,6 @@ local Runtime = require(vim.g.stevedore_runtime)
 
 local Action = require("stevedore.action").new(Runtime)
 
-local ns = vim.api.nvim_create_namespace("stevedore")
-
-local set_extmark_virt_text = function(buf, virt_texts)
-	vim.api.nvim_buf_clear_namespace(buf, ns, 0, -1)
-	for line, virt_text in ipairs(virt_texts) do
-		vim.api.nvim_buf_set_extmark(buf, ns, line - 1, 0, {
-			invalidate = true,
-			virt_text_pos = "eol_right_align",
-			virt_text = virt_text,
-		})
-	end
-end
-
-local status_sign_ns = vim.api.nvim_create_namespace("stevedore/status_sign")
-
-local set_extmark_signs = function(buf, signs)
-	vim.api.nvim_buf_clear_namespace(buf, status_sign_ns, 0, -1)
-	for line, sign in ipairs(signs) do
-		vim.api.nvim_buf_set_extmark(buf, status_sign_ns, line - 1, 0, {
-			invalidate = true,
-			sign_text = sign.sign_text,
-			sign_hl_group = sign.sign_hl_group,
-		})
-	end
-end
-
-local set_lines = function(buf, lines)
-	local cmd = string.format("lockmarks lua vim.api.nvim_buf_set_lines(%d, 0, -1, false, %s)", buf, vim.inspect(lines))
-	vim.cmd(cmd)
-	vim.bo[buf].modified = false
-end
-
 local proper_cursor = function()
 	vim.fn.search("^/\\x\\+/\\S", "ez", vim.fn.line("."))
 end
@@ -92,19 +62,13 @@ Stevedore.list_images = function(buf)
 			local images = Runtime.list_images()
 			vim.b[buf].images = images
 
-			local images_names = {} ---@type string[]
-			for _, image in ipairs(images) do
-				table.insert(images_names, format_line(image.id, image.name))
-			end
-			set_lines(buf, images_names)
-
+			ui_update_lines(buf, images, function(image)
+				return {
+					line = format_line(image.id, image.name),
+					virt_text = { { image.id, "StevedoreID" } },
+				}
+			end)
 			proper_cursor()
-
-			local virt_texts = {}
-			for idx, image in ipairs(images) do
-				table.insert(virt_texts, { { image.id, "StevedoreID" } })
-			end
-			set_extmark_virt_text(buf, virt_texts)
 		end,
 	})
 
@@ -133,31 +97,21 @@ Stevedore.list_containers = function(buf, image_id)
 			local containers = Runtime.list_containers(image_id)
 			vim.b[buf].containers = containers
 
-			local container_names = {} ---@type string[]
-			for _, c in ipairs(containers) do
-				table.insert(container_names, format_line(c.id, c.name))
-			end
-			set_lines(buf, container_names)
+			ui_update_lines(buf, containers, function(container)
+				local sign
+				if container.status == "Up" then
+					sign = { sign_text = "", sign_hl_group = "DiagnosticOk" }
+				else
+					sign = { sign_text = "⊗", sign_hl_group = "DiagnosticError" }
+				end
+				return {
+					sign = sign,
+					line = format_line(container.id, container.name),
+					virt_text = { { container.image_name, "@comment" }, { " ", "" }, { container.id, "StevedoreID" } },
+				}
+			end)
 
 			proper_cursor()
-
-			local virt_texts = {}
-			local signs = {}
-			for idx, c in ipairs(containers) do
-				table.insert(virt_texts, {
-					{ c.image_name, "@comment" },
-					{ " ", "" },
-					{ c.id, "StevedoreID" },
-				})
-
-				if c.status == "Up" then
-					table.insert(signs, { sign_text = "", sign_hl_group = "DiagnosticOk" })
-				else
-					table.insert(signs, { sign_text = "⊗", sign_hl_group = "DiagnosticError" })
-				end
-			end
-			set_extmark_virt_text(buf, virt_texts)
-			set_extmark_signs(buf, signs)
 		end,
 	})
 
