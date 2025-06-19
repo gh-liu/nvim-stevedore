@@ -1,5 +1,15 @@
+local idx2id = {}
+-- /idx/id/name:version
+local idx2id_add = function(id)
+	local idx = #idx2id + 1
+	idx2id[idx] = id
+	return idx
+end
+
 local autocmd = vim.api.nvim_create_autocmd
 
+local format_line = require("stevedore.utils").format_line
+local get_line_id = require("stevedore.utils").get_line_id
 local ui_update_lines = require("stevedore.ui").update_lines
 
 vim.api.nvim_set_hl(0, "StevedoreID", { link = "Label", default = true })
@@ -47,10 +57,6 @@ end
 
 local Stevedore = {}
 
-local format_line = function(id, name)
-	return string.format("/%s/%s", id, name)
-end
-
 local update_lines = function()
 	vim.cmd.edit() -- TODO
 end
@@ -64,7 +70,7 @@ Stevedore.list_images = function(buf)
 
 			ui_update_lines(buf, images, function(image)
 				return {
-					line = format_line(image.id, image.name),
+					line = format_line(idx2id_add(image.id), image.id, image.name),
 					virt_text = { { image.id, "StevedoreID" } },
 				}
 			end)
@@ -106,7 +112,7 @@ Stevedore.list_containers = function(buf, image_id)
 				end
 				return {
 					sign = sign,
-					line = format_line(container.id, container.name),
+					line = format_line(idx2id_add(container.id), container.id, container.name),
 					virt_text = { { container.image_name, "@comment" }, { " ", "" }, { container.id, "StevedoreID" } },
 				}
 			end)
@@ -148,8 +154,6 @@ local with_disable_undo = function(fn)
 	fn()
 	vim.bo[0].undolevels = cache_undolevels
 end
-
-local get_line_id = require("stevedore.utils").get_line_id
 
 local set_keywordprg = function(buf)
 	vim.bo[buf].keywordprg = ":StevedoreInfo"

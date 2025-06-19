@@ -1,7 +1,12 @@
 local M = {}
 
+M.format_line = function(idx, id, name)
+	-- NOTE: sync stevedoreId define in syntax/stevedore.vim
+	return string.format("/%d/%s/%s", idx, id, name)
+end
+
 M.get_line_id = function(line)
-	return line:match("^/(%x+)/")
+	return line:match("^/%d+/(%x+)/")
 end
 
 ---@param cmd string[]
