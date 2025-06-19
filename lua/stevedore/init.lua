@@ -65,11 +65,6 @@ local set_extmark_signs = function(buf, signs)
 	end
 end
 
-local set_conceal = function()
-	vim.wo[0][0].concealcursor = "nvic"
-	vim.wo[0][0].conceallevel = 3
-end
-
 local set_lines = function(buf, lines)
 	local cmd = string.format("lockmarks lua vim.api.nvim_buf_set_lines(%d, 0, -1, false, %s)", buf, vim.inspect(lines))
 	vim.cmd(cmd)
@@ -110,8 +105,6 @@ Stevedore.list_images = function(buf)
 				table.insert(virt_texts, { { image.id, "StevedoreID" } })
 			end
 			set_extmark_virt_text(buf, virt_texts)
-
-			set_conceal()
 		end,
 	})
 
@@ -165,8 +158,6 @@ Stevedore.list_containers = function(buf, image_id)
 			end
 			set_extmark_virt_text(buf, virt_texts)
 			set_extmark_signs(buf, signs)
-
-			set_conceal()
 		end,
 	})
 
