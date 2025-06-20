@@ -61,23 +61,7 @@ local update_lines = function()
 	vim.cmd.edit() -- TODO
 end
 
-Stevedore.list_images = function(buf)
-	autocmd("BufEnter", {
-		buffer = buf,
-		callback = function()
-			local images = Runtime.list_images()
-			vim.b[buf].images = images
-
-			ui_update_lines(buf, images, function(image)
-				return {
-					line = format_line(idx2id_add(image.id), image.id, image.name),
-					virt_text = { { image.id, "StevedoreID" } },
-				}
-			end)
-			proper_cursor()
-		end,
-	})
-
+local image_list_maps = function(buf)
 	vim.keymap.set("n", "<cr>", Action.split_containers, { buffer = 0 })
 	vim.keymap.set("n", "coi", Action.inspect, { buffer = 0 })
 	vim.keymap.set("n", "cor", function()
@@ -96,7 +80,47 @@ Stevedore.list_images = function(buf)
 	end, { buffer = 0 })
 end
 
+local container_list_maps = function(buf)
+	vim.keymap.set("n", "coi", Action.inspect, { buffer = 0 })
+	vim.keymap.set("n", "coa", function()
+		Action.attach_container()
+	end, { buffer = 0 })
+	vim.keymap.set("n", "cos", function()
+		Action.start({ interactive = true })
+	end, { buffer = 0 })
+	vim.keymap.set("n", "coS", function()
+		Action.start({ interactive = false })
+	end, { buffer = 0 })
+	vim.keymap.set("n", "coq", Action.stop, { buffer = 0 })
+	vim.keymap.set("n", "col", Action.logs, { buffer = 0 })
+	vim.keymap.set("n", "cod", function()
+		Action.rm()
+		update_lines()
+	end, { buffer = 0 })
+end
+
+Stevedore.list_images = function(buf)
+	image_list_maps(buf)
+	autocmd("BufEnter", {
+		buffer = buf,
+		callback = function()
+			local images = Runtime.list_images()
+			vim.b[buf].images = images
+
+			ui_update_lines(buf, images, function(image)
+				return {
+					line = format_line(idx2id_add(image.id), image.id, image.name),
+					virt_text = { { image.id, "StevedoreID" } },
+				}
+			end)
+
+			proper_cursor()
+		end,
+	})
+end
+
 Stevedore.list_containers = function(buf, image_id)
+	container_list_maps(buf)
 	autocmd("BufEnter", {
 		buffer = buf,
 		callback = function()
@@ -120,23 +144,6 @@ Stevedore.list_containers = function(buf, image_id)
 			proper_cursor()
 		end,
 	})
-
-	vim.keymap.set("n", "coi", Action.inspect, { buffer = 0 })
-	vim.keymap.set("n", "coa", function()
-		Action.attach_container()
-	end, { buffer = 0 })
-	vim.keymap.set("n", "cos", function()
-		Action.start({ interactive = true })
-	end, { buffer = 0 })
-	vim.keymap.set("n", "coS", function()
-		Action.start({ interactive = false })
-	end, { buffer = 0 })
-	vim.keymap.set("n", "coq", Action.stop, { buffer = 0 })
-	vim.keymap.set("n", "col", Action.logs, { buffer = 0 })
-	vim.keymap.set("n", "cod", function()
-		Action.rm()
-		update_lines()
-	end, { buffer = 0 })
 end
 
 Stevedore.inspect = function(buf, id)
