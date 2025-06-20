@@ -51,10 +51,6 @@ local Runtime = require(vim.g.stevedore_runtime)
 
 local Action = require("stevedore.action").new(Runtime)
 
-local proper_cursor = function()
-	vim.fn.search("^/\\x\\+/\\S", "ez", vim.fn.line("."))
-end
-
 local Stevedore = {}
 
 local update_lines = function()
@@ -113,8 +109,6 @@ Stevedore.list_images = function(buf)
 					virt_text = { { image.id, "StevedoreID" } },
 				}
 			end)
-
-			proper_cursor()
 		end,
 	})
 end
@@ -140,8 +134,6 @@ Stevedore.list_containers = function(buf, image_id)
 					virt_text = { { container.image_name, "@comment" }, { " ", "" }, { container.id, "StevedoreID" } },
 				}
 			end)
-
-			proper_cursor()
 		end,
 	})
 end

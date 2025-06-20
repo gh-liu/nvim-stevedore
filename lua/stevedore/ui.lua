@@ -4,6 +4,8 @@ local set_lines = function(buf, lines)
 	local cmd = string.format("lockmarks lua vim.api.nvim_buf_set_lines(%d, 0, -1, false, %s)", buf, vim.inspect(lines))
 	vim.cmd(cmd)
 	vim.bo[buf].modified = false
+
+	require("stevedore.utils").proper_cursor()
 end
 
 local ns = vim.api.nvim_create_namespace("stevedore")

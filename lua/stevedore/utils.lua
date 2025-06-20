@@ -9,6 +9,10 @@ M.get_line_id = function(line)
 	return line:match("^/%d+/(%x+)/")
 end
 
+M.proper_cursor = function()
+	vim.fn.search("^/\\d*/\\x\\+/\\S", "ez", vim.fn.line("."))
+end
+
 ---@param cmd string[]
 M.term_win = function(cmd, opts)
 	opts = opts or {}
