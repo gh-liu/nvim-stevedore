@@ -77,7 +77,8 @@ Podman.run = function(id, opts)
 		table.insert(cmd, name)
 	end
 	if interactive then
-		table.insert(cmd, "--rm", "-it")
+		table.insert(cmd, "--rm")
+		table.insert(cmd, "-it")
 		table.insert(cmd, id)
 		term_win(cmd)
 	else
